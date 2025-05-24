@@ -7,7 +7,7 @@ import Dashboard from './components/Dashboard'
 function App() {
   return (
     <div>
-      <h1>Stock Dashboard</h1>
+      <h1 className=''>Stock Dashboard</h1>
       <Dashboard />
     </div>
   )
