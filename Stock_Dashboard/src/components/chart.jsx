@@ -1,20 +1,33 @@
 
 import React from 'react'
 
-const priceT = () => {
+const PriceT = () => {
 
     return (
         <div>
-
+            
             
         </div>
     )
 }
-const chart = () => {
+
+const Graph = () => {
+
+    return (
+          <div className='border-2 border-black h-70 my-10'>
+        chart
+        </div>
+    )
+}
+const Chart = () => {
+    
   return (
-    <div>chart</div>
+    <div>
+    <Graph />
+        
+        </div>
   )
 }
 
 
-export default chart
+export default Chart
