@@ -23,13 +23,14 @@ const PriceT = () => {
 
   return (
     <div>
-      <div>Ticker: AAPL</div>
+      <div><b>Ticker: AAPL</b></div>
       <div className='align-center'>
         {loading && "Loading..."}
         {error && "Error loading data"}
         {data && !loading && !error && (
-          <div>
-            Current Price: {data.c}
+          <div className='text-3xl'>
+            <b>{data.c}</b>
+            <div className='text-xs'>{data.pc}</div>
           </div>
         )}
       </div>
@@ -50,7 +51,7 @@ const Chart = () => {
 
   return (
     <div>
-    <div className='grid grid-cols-[2fr_4fr_4fr] gap-8 my-20 mx-10 min-w-0 items-start'>
+    <div className='grid grid-cols-[2fr_4fr_4fr] gap-8 my-20 mx-10 min-w-0 items-start shadow-2xl rounded-2xl p-10'>
 
        <div className='border-2 border-black h-100 w-100 col-span-2 rounded'>
     <Graph />
