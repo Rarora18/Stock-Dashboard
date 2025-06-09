@@ -18,6 +18,7 @@ const Dashboard = () => {
   
   return (
     <div>
+      
     <Searchbar />
 
     </div>
