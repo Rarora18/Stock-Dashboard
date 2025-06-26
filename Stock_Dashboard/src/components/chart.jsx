@@ -35,8 +35,9 @@ const PriceT = ({ticker}) => {
         {error && "Error loading data"}
         {data && data.quote && data.profile && !loading && !error && (
           <div className='text-3xl'>
-            <b>{data.quote.c}</b>
-            <div className='text-xs'>{data.quote.pc}</div>
+            <b>${data.quote.c}</b>
+
+            <div className='text-xs'>${data.quote.pc}</div>
             <div className = 'text-xs'>{data.profile.symbol}</div>
           </div>
         )}
@@ -66,7 +67,19 @@ return(
   </div>
 )
 }
+const Stockname = ({ticker}) => {
 
+  useEffect(() => {
+    fetch(`https://finnhub.io/api/v1/search?q=apple&exchange=US&token=${import.meta.env.VITE_API_KEY}`).then(res => res.json())
+
+  }
+  , [ticker])
+  return (
+    <div>
+
+    </div>
+  )
+}
 const Chart = () => {
 
   const [stock, setStock] = useState('NVDA');
@@ -90,6 +103,7 @@ const Chart = () => {
         
     <div className='my-5 content-center border-2 border-black h-24 w-48 relative rounded'>     
        <PriceT ticker={stock} />
+       
         </div>
     </div>
      
