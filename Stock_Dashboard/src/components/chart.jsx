@@ -261,8 +261,8 @@ const Graph = ({ticker, shouldFetch}) => {
               onClick={() => handleTimePeriodChange(period.value)}
               className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                 timePeriod === period.value
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-green-600 text-white shadow-md'
+                  : 'bg-gray-200 text-gray-700 hover:bg-blue-600 hover:text-white'
               }`}
             >
               {period.label}
