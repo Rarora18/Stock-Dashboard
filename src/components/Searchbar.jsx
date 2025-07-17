@@ -21,7 +21,7 @@ const Searchbar = ({search, setSearch, onSearch}) => {
 
     return <div>
       <div className='flex flex-start'>
-        <input value = {search}  onChange = {handleQuery} className='mx-4 h-10 w-80 px-2 shadow-lg rounded-2xl' type="text" placeholder='Search Stocks' />
+        <input value = {search}  onChange = {handleQuery} className='mx-4 h-10 w-80 px-2 shadow-lg rounded-2xl' type="text" placeholder='Search Ticker' />
         <button onClick={handleSearchClick} className='bg-yellow-600 shadow-lg '> Search</button>
       </div>
     </div>
