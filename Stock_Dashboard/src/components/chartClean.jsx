@@ -303,6 +303,18 @@ const BasicFin = ({ ticker, shouldFetch }) => {
     )
   }
 
+  const metrics = data?.metrics?.metric || {}
+  const formatCurrency = (value) => (typeof value === 'number' ? `$${value.toFixed(2)}` : 'N/A')
+  const formatRatio = (value) => (typeof value === 'number' ? value.toFixed(2) : 'N/A')
+  const formatPercent = (value) => (typeof value === 'number' ? `${value.toFixed(2)}%` : 'N/A')
+  const formatLargeNumber = (value) => {
+    if (typeof value !== 'number') return 'N/A'
+    if (value >= 1_000_000_000_000) return `${(value / 1_000_000_000_000).toFixed(2)}T`
+    if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(2)}B`
+    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M`
+    return value.toLocaleString()
+  }
+
   return (
     <div>
       {loading && <div className="py-10 text-center text-sm text-purple-300">Loading financials...</div>}
@@ -310,11 +322,8 @@ const BasicFin = ({ ticker, shouldFetch }) => {
         <div className="rounded-xl border border-purple-900/70 bg-zinc-950/70 p-4">
           <div className="mb-3 border-b border-purple-900/70 pb-2 text-sm font-semibold text-purple-100">Key Financials</div>
           <div className="space-y-3 text-sm text-purple-200">
-            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">52 Week High:</span><span>{typeof data.metrics?.metric?.['52WeekHigh'] === 'number' ? `$${data.metrics.metric['52WeekHigh'].toFixed(2)}` : 'N/A'}</span></div>
-            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">52 Week Low:</span><span>{typeof data.metrics?.metric?.['52WeekLow'] === 'number' ? `$${data.metrics.metric['52WeekLow'].toFixed(2)}` : 'N/A'}</span></div>
-            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">P/E Ratio:</span><span>{typeof data.metrics?.metric?.['peBasicExclExtraTTM'] === 'number' ? data.metrics.metric['peBasicExclExtraTTM'].toFixed(2) : 'N/A'}</span></div>
-            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Current Price:</span><span>{typeof data.quote.c === 'number' ? `$${data.quote.c.toFixed(2)}` : 'N/A'}</span></div>
-            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Previous Close:</span><span>{typeof data.quote.pc === 'number' ? `$${data.quote.pc.toFixed(2)}` : 'N/A'}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Current Price:</span><span>{formatCurrency(data.quote.c)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Previous Close:</span><span>{formatCurrency(data.quote.pc)}</span></div>
             <div className="flex items-center justify-between">
               <span className="font-semibold text-purple-300">Change:</span>
               <span className={typeof data.quote.d === 'number' && data.quote.d >= 0 ? 'text-emerald-300' : 'text-rose-300'}>
@@ -327,9 +336,23 @@ const BasicFin = ({ ticker, shouldFetch }) => {
                 {typeof data.quote.dp === 'number' ? `${data.quote.dp >= 0 ? '+' : ''}${data.quote.dp.toFixed(2)}%` : 'N/A'}
               </span>
             </div>
-            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">High:</span><span>{typeof data.quote.h === 'number' ? `$${data.quote.h.toFixed(2)}` : 'N/A'}</span></div>
-            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Low:</span><span>{typeof data.quote.l === 'number' ? `$${data.quote.l.toFixed(2)}` : 'N/A'}</span></div>
-            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Open:</span><span>{typeof data.quote.o === 'number' ? `$${data.quote.o.toFixed(2)}` : 'N/A'}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Day High:</span><span>{formatCurrency(data.quote.h)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Day Low:</span><span>{formatCurrency(data.quote.l)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Open:</span><span>{formatCurrency(data.quote.o)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Volume:</span><span>{typeof data.quote.v === 'number' ? formatLargeNumber(data.quote.v) : 'N/A'}</span></div>
+            <div className="my-2 border-t border-purple-900/60 pt-2"></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Market Cap:</span><span>{typeof data.profile?.marketCapitalization === 'number' ? `${formatLargeNumber(data.profile.marketCapitalization * 1_000_000)}` : 'N/A'}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">52 Week High:</span><span>{formatCurrency(metrics['52WeekHigh'])}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">52 Week Low:</span><span>{formatCurrency(metrics['52WeekLow'])}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">P/E Ratio (TTM):</span><span>{formatRatio(metrics.peBasicExclExtraTTM)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">P/B Ratio:</span><span>{formatRatio(metrics.pbAnnual)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Beta:</span><span>{formatRatio(metrics.beta)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">EPS (TTM):</span><span>{formatRatio(metrics.epsBasicExclExtraItemsTTM)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">ROE (TTM):</span><span>{formatPercent(metrics.roeTTM)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">ROA (TTM):</span><span>{formatPercent(metrics.roaTTM)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Operating Margin:</span><span>{formatPercent(metrics.operatingMarginTTM)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Net Margin:</span><span>{formatPercent(metrics.netMarginTTM)}</span></div>
+            <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Dividend Yield:</span><span>{formatPercent(metrics.dividendYieldIndicatedAnnual)}</span></div>
             <div className="flex items-center justify-between"><span className="font-semibold text-purple-300">Country:</span><span>{typeof data.profile?.country === 'string' ? data.profile.country : 'N/A'}</span></div>
           </div>
         </div>
