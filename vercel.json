@@ -1,8 +1,8 @@
 {
   "framework": "vite",
-  "installCommand": "cd Stock_Dashboard && npm install",
-  "buildCommand": "cd Stock_Dashboard && npm run build",
-  "outputDirectory": "Stock_Dashboard/dist",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
