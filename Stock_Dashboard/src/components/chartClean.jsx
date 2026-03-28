@@ -518,16 +518,33 @@ const ChartClean = () => {
     if (!apiKey || apiKey === 'your_finnhub_api_key_here') setApiKeyMissing(true)
   }, [])
 
-  const handleSearch = () => {
-    setStock(inputValue.toUpperCase())
+  const handleSearch = async (searchValue = inputValue) => {
+    const query = searchValue.trim()
+    if (!query) return
+
+    let targetSymbol = query.toUpperCase()
+    const apiKey = import.meta.env.VITE_API_KEY
+
+    if (apiKey && apiKey !== 'your_finnhub_api_key_here') {
+      try {
+        const res = await fetch(`https://finnhub.io/api/v1/search?q=${encodeURIComponent(query)}&exchange=US&token=${apiKey}`)
+        const result = await res.json()
+        if (Array.isArray(result?.result) && result.result.length > 0) {
+          const bestMatch = result.result.find((item) => item?.type === 'Common Stock' && item?.symbol) || result.result.find((item) => item?.symbol)
+          if (bestMatch?.symbol) targetSymbol = bestMatch.symbol.toUpperCase()
+        }
+      } catch {
+        // If search resolution fails, fallback to entered value.
+      }
+    }
+
+    setInputValue(targetSymbol)
+    setStock(targetSymbol)
     setShouldFetch(true)
   }
 
   const handleCompetitorClick = (symbol) => {
-    const selected = symbol.toUpperCase()
-    setInputValue(selected)
-    setStock(selected)
-    setShouldFetch(true)
+    handleSearch(symbol)
   }
 
   if (apiKeyMissing) {
