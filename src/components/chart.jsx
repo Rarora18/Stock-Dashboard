@@ -310,11 +310,17 @@ const Graph = ({ticker, shouldFetch}) => {
               <button
                 key={period.value}
                 onClick={() => handleTimePeriodChange(period.value)}
-                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
                   timePeriod === period.value
-                    ? 'bg-green-600 text-blue shadow-md'
-                    : 'bg-gray-200 text-gray-700 hover:bg-blue-600 hover:text-blue'
+                    ? 'border-purple-500 bg-black text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.55)]'
+                    : 'border-purple-700 bg-black text-purple-300 hover:border-purple-500 hover:text-purple-200'
                 }`}
+                style={{
+                  backgroundColor: '#000000',
+                  color: timePeriod === period.value ? '#e9d5ff' : '#c4b5fd',
+                  borderColor: timePeriod === period.value ? '#a855f7' : '#7e22ce',
+                  boxShadow: timePeriod === period.value ? '0 0 20px rgba(168,85,247,0.7)' : 'none'
+                }}
               >
                 {period.label}
               </button>

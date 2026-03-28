@@ -338,6 +338,175 @@ const BasicFin = ({ ticker, shouldFetch }) => {
   )
 }
 
+const NewsSection = ({ ticker, shouldFetch }) => {
+  const [news, setNews] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    if (!shouldFetch || !ticker) {
+      setNews([])
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    const apiKey = import.meta.env.VITE_API_KEY
+    if (!apiKey || apiKey === 'your_finnhub_api_key_here') {
+      setError(new Error('API key not configured'))
+      setLoading(false)
+      return
+    }
+
+    const today = new Date()
+    const fromDate = new Date(today)
+    fromDate.setDate(today.getDate() - 7)
+    const to = today.toISOString().split('T')[0]
+    const from = fromDate.toISOString().split('T')[0]
+
+    setLoading(true)
+    setError(null)
+    fetch(`https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${from}&to=${to}&token=${apiKey}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch news')
+        return res.json()
+      })
+      .then((result) => {
+        setNews(Array.isArray(result) ? result.slice(0, 6) : [])
+        setLoading(false)
+      })
+      .catch((err) => {
+        setError(err)
+        setLoading(false)
+      })
+  }, [ticker, shouldFetch])
+
+  return (
+    <div className="rounded-2xl border border-purple-900/70 bg-zinc-950/70 p-5 shadow-[0_0_24px_rgba(168,85,247,0.12)]">
+      <div className="mb-4 text-sm font-semibold text-purple-200">Latest News</div>
+      {loading && <div className="text-sm text-purple-300">Loading news...</div>}
+      {error && <div className="text-sm text-rose-400">Unable to load news</div>}
+      {!loading && !error && news.length === 0 && <div className="text-sm text-purple-300">No recent news found.</div>}
+      {!loading && !error && news.length > 0 && (
+        <div className="space-y-3">
+          {news.map((item) => (
+            <a
+              key={`${item.id || item.datetime || item.url}`}
+              href={item.url}
+              target="_blank"
+              rel="noreferrer"
+              className="block rounded-xl border border-purple-900/70 bg-zinc-900/70 p-3 transition hover:border-purple-600"
+            >
+              <div className="text-sm font-medium text-purple-100">{item.headline || 'Untitled article'}</div>
+              <div className="mt-1 text-xs text-purple-300/80">
+                {item.source || 'Unknown source'} {' - '}
+                {item.datetime ? new Date(item.datetime * 1000).toLocaleDateString() : 'Unknown date'}
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+const CompetitorsSection = ({ ticker, shouldFetch, onSelectTicker }) => {
+  const [competitors, setCompetitors] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    if (!shouldFetch || !ticker) {
+      setCompetitors([])
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    const apiKey = import.meta.env.VITE_API_KEY
+    if (!apiKey || apiKey === 'your_finnhub_api_key_here') {
+      setError(new Error('API key not configured'))
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    fetch(`https://finnhub.io/api/v1/stock/peers?symbol=${ticker}&token=${apiKey}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch competitors')
+        return res.json()
+      })
+      .then((peers) => {
+        const filteredPeers = Array.isArray(peers) ? peers.filter((symbol) => symbol !== ticker).slice(0, 6) : []
+        if (filteredPeers.length === 0) {
+          setCompetitors([])
+          setLoading(false)
+          return
+        }
+        return Promise.all(
+          filteredPeers.map((symbol) =>
+            Promise.all([
+              fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`).then((res) => res.json()),
+              fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${apiKey}`).then((res) => res.json())
+            ]).then(([quote, profile]) => ({
+              symbol,
+              name: profile?.name || profile?.ticker || symbol,
+              price: typeof quote?.c === 'number' ? quote.c : null,
+              changePercent: typeof quote?.dp === 'number' ? quote.dp : null
+            }))
+          )
+        )
+      })
+      .then((result) => {
+        setCompetitors(Array.isArray(result) ? result : [])
+        setLoading(false)
+      })
+      .catch((err) => {
+        setError(err)
+        setLoading(false)
+      })
+  }, [ticker, shouldFetch])
+
+  return (
+    <div className="rounded-2xl border border-purple-900/70 bg-zinc-950/70 p-5 shadow-[0_0_24px_rgba(168,85,247,0.12)]">
+      <div className="mb-4 text-sm font-semibold text-purple-200">Competitors</div>
+      {loading && <div className="text-sm text-purple-300">Loading competitors...</div>}
+      {error && <div className="text-sm text-rose-400">Unable to load competitors</div>}
+      {!loading && !error && competitors.length === 0 && <div className="text-sm text-purple-300">No competitor data found.</div>}
+      {!loading && !error && competitors.length > 0 && (
+        <div className="space-y-2">
+          {competitors.map((item) => (
+            <a
+              key={item.symbol}
+              href="#"
+              onClick={(event) => {
+                event.preventDefault()
+                onSelectTicker(item.symbol)
+              }}
+              className="block rounded-xl border border-purple-900/70 bg-zinc-900/70 p-3 transition hover:border-purple-600"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-semibold text-purple-100">{item.symbol}</div>
+                  <div className="text-xs text-purple-300/80">{item.name}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-purple-100">{item.price !== null ? `$${item.price.toFixed(2)}` : 'N/A'}</div>
+                  <div className={`text-xs ${item.changePercent !== null && item.changePercent >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                    {item.changePercent !== null ? `${item.changePercent >= 0 ? '+' : ''}${item.changePercent.toFixed(2)}%` : 'N/A'}
+                  </div>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const ChartClean = () => {
   const [inputValue, setInputValue] = useState('NVDA')
   const [stock, setStock] = useState('NVDA')
@@ -351,6 +520,13 @@ const ChartClean = () => {
 
   const handleSearch = () => {
     setStock(inputValue.toUpperCase())
+    setShouldFetch(true)
+  }
+
+  const handleCompetitorClick = (symbol) => {
+    const selected = symbol.toUpperCase()
+    setInputValue(selected)
+    setStock(selected)
     setShouldFetch(true)
   }
 
@@ -380,6 +556,10 @@ const ChartClean = () => {
             <div className="rounded-2xl border border-purple-900/70 bg-zinc-950/70 p-5 shadow-[0_0_24px_rgba(168,85,247,0.12)]">
               <div className="mb-4 text-sm font-semibold text-purple-200">Price Chart</div>
               <Graph ticker={stock} shouldFetch={shouldFetch} />
+            </div>
+            <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+              <CompetitorsSection ticker={stock} shouldFetch={shouldFetch} onSelectTicker={handleCompetitorClick} />
+              <NewsSection ticker={stock} shouldFetch={shouldFetch} />
             </div>
           </div>
 
